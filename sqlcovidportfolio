@@ -1,0 +1,56 @@
+-- # People Vaccinated Top 10 Countries
+SELECT continent, location, SUM(people_vaccinated) AS PeopleVaccinated
+FROM covidvac
+WHERE continent is NOT NULL
+GROUP BY continent, location
+HAVING SUM(people_vaccinated)>0
+ORDER BY SUM(people_vaccinated) DESC
+LIMIT 10
+
+-- # People Vaccinated by Continent
+SELECT continent, SUM(people_vaccinated) AS TotPeopleVaccinated
+FROM covidvac
+WHERE continent is NOT NULL
+GROUP BY continent
+HAVING SUM(people_vaccinated) > 0
+ORDER BY SUM(people_vaccinated) DESC
+
+-- Total Cases vs Total Deaths Top 10 Countries (by Total Deaths)
+SELECT continent, location, SUM(total_cases) AS TotalCases, SUM(total_deaths) AS TotalDeaths
+FROM coviddeath
+WHERE continent is NOT NULL
+GROUP BY continent, location
+HAVING SUM(total_deaths) > 0
+ORDER BY SUM(total_deaths) DESC
+LIMIT 10
+
+-- Total Cases vs Total Deaths by Continent
+SELECT continent, SUM(total_cases) AS TotalCases, SUM(total_deaths) AS TotalDeaths
+FROM coviddeath
+WHERE continent is NOT NULL
+GROUP BY continent
+HAVING SUM(total_deaths) > 0
+ORDER BY SUM(total_deaths) DESC
+
+-- Check Covidvac Table
+SELECT * FROM covidvac
+
+-- Create New Table Names Covidvac
+CREATE TABLE covidvac (
+continent VARCHAR(50),
+location VARCHAR(50),
+date DATE,
+people_vaccinated BIGINT)
+
+-- Check Coviddeath Table
+SELECT * FROM coviddeath
+
+-- Create New Table Names Coviddeath
+CREATE TABLE coviddeath (
+continent VARCHAR(50),
+location VARCHAR(50),
+date DATE,
+population BIGINT,
+total_cases BIGINT,
+new_cases BIGINT,
+total_deaths BIGINT)
