@@ -1,3 +1,7 @@
+-- Data source: Future Business Survey, Unweighted country level data for the semi-annual Future of Business Survey, fielded in December 2020
+-- Data provider: Facebook and OCHA Services
+-- Link: https://dataforgood.fb.com/
+
 -- Create table named bizsurvey
 CREATE TABLE bizsurvey(
 countrycode VARCHAR(3),
