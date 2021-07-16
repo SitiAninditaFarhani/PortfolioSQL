@@ -1,0 +1,205 @@
+-- Create table named bizsurvey
+CREATE TABLE bizsurvey(
+countrycode VARCHAR(3),
+question VARCHAR(1000),
+answercategory VARCHAR(1000),
+statistics BIGINT,
+population BIGINT)
+
+-- Create table named ccode for country code
+CREATE TABLE ccode(
+country VARCHAR(200),
+	countrycode VARCHAR(3)
+)
+
+--Recheck bizsurvey table
+SELECT * FROM bizsurvey
+
+--Recheck ccode table
+SELECT * FROM ccode
+
+-- Join two table bizsurvey and ccode
+-- country code and country
+SELECT bizsurvey.countrycode, ccode.country, bizsurvey.question
+FROM bizsurvey
+INNER JOIN ccode ON bizsurvey.countrycode = ccode.countrycode
+
+-- Statistics for education level by country (i)
+SELECT bizsurvey.countrycode, ccode.country, bizsurvey.question, bizsurvey.answercategory, bizsurvey.statistics
+FROM bizsurvey
+INNER JOIN ccode ON bizsurvey.countrycode = ccode.countrycode
+WHERE bizsurvey.question = 'edu_text'
+
+-- Statistics for education level by country (ii)
+SELECT ccode.country, bizsurvey.question, bizsurvey.answercategory, bizsurvey.statistics
+FROM bizsurvey
+INNER JOIN ccode ON bizsurvey.countrycode = ccode.countrycode
+WHERE bizsurvey.question = 'edu_text'
+
+-- Percentage of employee reduction as a result of COVID-19 pandemic
+-- List by country with highest employee reduction
+SELECT ccode.country, bizsurvey.answercategory, bizsurvey.statistics, bizsurvey.population, ROUND(bizsurvey.statistics*100 /bizsurvey.population,1) AS EmplReductionPercentage
+FROM bizsurvey
+INNER JOIN ccode ON bizsurvey.countrycode = ccode.countrycode
+WHERE bizsurvey.question = 'bus_emp_chn_text'
+AND bizsurvey.answercategory IN ('Reduced number of workers')
+ORDER BY ROUND(bizsurvey.statistics*100 /bizsurvey.population,1) DESC
+
+-- Percentage of employee reduction as a result of COVID-19 pandemic
+-- List by top 10 country with highest employee reduction
+SELECT ccode.country, bizsurvey.answercategory, bizsurvey.statistics, bizsurvey.population, ROUND(bizsurvey.statistics*100 /bizsurvey.population,1) AS EmplReductionPercentage
+FROM bizsurvey
+INNER JOIN ccode ON bizsurvey.countrycode = ccode.countrycode
+WHERE bizsurvey.question = 'bus_emp_chn_text'
+AND bizsurvey.answercategory IN ('Reduced number of workers')
+ORDER BY ROUND(bizsurvey.statistics*100 /bizsurvey.population,1) DESC
+LIMIT 10
+
+-- Top 10 countries whose business owners have loan or credit from fin institution
+SELECT ccode.country, bizsurvey.question, bizsurvey.answercategory, bizsurvey.statistics, bizsurvey.population, ROUND(bizsurvey.statistics*100 /bizsurvey.population,1) AS BizWithLoan
+FROM bizsurvey
+INNER JOIN ccode ON bizsurvey.countrycode = ccode.countrycode
+WHERE bizsurvey.question = 'bus_lon_text'
+AND bizsurvey.answercategory IN ('Yes')
+ORDER BY ROUND(bizsurvey.statistics*100 /bizsurvey.population,1) DESC
+LIMIT 10
+
+-- Percentage of business owners and/or business managers
+-- who agree that business performance
+-- is lower in 2020 compared to 2019 (year-to-year)
+-- by country
+SELECT ccode.country, bizsurvey.answercategory, bizsurvey.statistics, bizsurvey.population, ROUND(bizsurvey.statistics*100 /bizsurvey.population,1) AS LowerPerformance 
+FROM bizsurvey
+INNER JOIN ccode ON bizsurvey.countrycode = ccode.countrycode
+WHERE bizsurvey.question = 'bus_sls_dif_text'
+AND bizsurvey.answercategory = 'Lower than last year'
+ORDER BY ROUND(bizsurvey.statistics*100 /bizsurvey.population,1) DESC
+
+--Main challenges when a business uses or tries to adopt digital platforms for the sale or purchase of goods and services?
+SELECT answercategory AS challenge, SUM(statistics) AS yes
+FROM bizsurvey
+WHERE answercategory IN (
+	'Need for more technical skills and knowledge',
+	'Need for more resources or infrastructure (e.g. broadband)',
+	'Paying fees incurred for accessing digital platforms.',
+	'Extreme or unfair competition with similar products or services offered on the platform by other businesses or the platform itself',
+	'Lack of understanding on how my business data can be used by third parties and how to protect them',
+	'Complying with digital security and consumer protection standards and legal requirements.',
+	'Difficulties in switching between platforms or using more than one platform at the same time.',
+	'Something not listed here',
+	'No challenges'
+	)
+GROUP BY answercategory
+ORDER BY SUM(statistics) DESC
+
+-- Main obstacles for increasing the use of digital technologies in a business
+SELECT answercategory AS challenge, SUM(statistics) AS yes
+FROM bizsurvey
+WHERE answercategory IN (
+	'Cost of purchasing or using the technology',
+	'Difficulties in integrating the technology in businesses processes',
+	'Lack of awareness or understanding of the type of tools that could be useful for my business',
+	'Lack of skills and technical knowledge inside the business to use digital technologies'
+	)
+GROUP BY answercategory
+ORDER BY SUM(statistics) DESC
+
+-- Do you think the COVID-19 crisis is going to change the use of digital technologies permanently for this business?
+SELECT answercategory AS answer, SUM(statistics) AS number_of_person
+FROM bizsurvey
+WHERE question = 'dig_prm_text'
+GROUP BY question, answercategory
+ORDER BY SUM(statistics) DESC
+
+-- Digital technologies currently use
+SELECT answercategory AS answer, SUM(statistics) AS yes
+FROM bizsurvey
+WHERE answercategory IN (
+	'Cloud computing',
+	'Customer relationship management software',
+	'Enterprise resource planning systems',
+	'None of the above',
+	'Online sales or purchases',
+	'Supply-chain management software',
+	'Teleworking for at least 50% of employees')
+GROUP BY answercategory
+ORDER BY SUM(statistics) DESC
+
+-- Use of digital platforms for selling or purchasing goods and services changed since the start of the COVID-19 pandemic
+SELECT answercategory AS answer, SUM(statistics) AS statistics
+FROM bizsurvey
+WHERE question = 'dig_use_text'
+GROUP BY question, answercategory
+ORDER BY SUM(statistics) DESC
+
+-- Employees laid off since the COVID-19 pandemic began
+SELECT answercategory AS answer, SUM(statistics) AS statistics
+FROM bizsurvey
+WHERE question = 'emp_lof_text'
+GROUP BY question, answercategory
+ORDER BY SUM(statistics) DESC
+
+-- Number of employees business put on government programs that partially or fully cover salaries of workers who remain employed since the COVID-19 pandemic began
+SELECT answercategory AS answer, SUM(statistics) AS statistics
+FROM bizsurvey
+WHERE question = 'emp_sub_text'
+GROUP BY question, answercategory
+ORDER BY SUM(statistics) DESC
+
+-- Difficulties business experienced in identifying and accessing government support (if any)
+SELECT answercategory AS answer, SUM(statistics) AS yes
+FROM bizsurvey
+WHERE answercategory IN (
+	'This business did not face any particular difficulty in identifying or accessing government support programs',
+	'It was difficult to identify which support my business was eligible for and how to receive it',
+	'Long delays before receiving government support',
+	'The procedures to claim for support were complex or time consuming',
+	'This business experienced other kinds of difficulties'
+)
+GROUP BY answercategory
+ORDER BY SUM(statistics) DESC
+
+-- Types of government support might this business need in the near future
+SELECT answercategory AS answer, SUM(statistics) AS yes
+FROM bizsurvey
+WHERE answercategory IN (
+	'Changing business operations and proposing new products or services',
+	'Help covering charges and fixed costs, including rents, credits and salaries',
+	'Help using new digital tools',
+	'No support needed',
+	'Something not listed here',
+	'Reconnecting to supply chains, accessing markets or rebuilding a customer base and a network of suppliers and partners',
+	'Training managers and employees to adapt to new business conditions'
+)
+GROUP BY answercategory
+ORDER BY SUM(statistics) DESC
+
+-- Importance of government support for the business
+SELECT answercategory AS answer, SUM(statistics) AS statistics
+FROM bizsurvey
+WHERE question = 'gov_imp_text'
+GROUP BY question, answercategory
+ORDER BY SUM(statistics) DESC
+
+-- Why business not receiving any kind of government support in response to the COVID-19 pandemic
+SELECT answercategory AS answer, SUM(statistics) AS statistics
+FROM bizsurvey
+WHERE question = 'gov_nhp_text'
+GROUP BY question, answercategory
+ORDER BY SUM(statistics) DESC
+
+-- Business operation according to economic sub-sector category
+SELECT answercategory AS answer, SUM(statistics) AS yes
+FROM bizsurvey
+WHERE question IN (
+	'ind_hcr_text',
+	'ind_icm_text',
+	'ind_mfg_text',
+	'ind_oth_text',
+	'ind_top_text',
+	'ind_trd_text',
+	'ind_trn_text'
+)
+AND NOT answercategory = 'NA' 
+GROUP BY answercategory
+ORDER BY SUM(statistics) DESC
